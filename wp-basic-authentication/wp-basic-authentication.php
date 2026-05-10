@@ -3,7 +3,7 @@
  * Plugin Name:       WP Basic Authentication
  * Plugin URI:        https://wordpress.org/plugins/wp-basic-authentication/
  * Description:       Basic Authentication for protected your development WordPress site like .htpasswd
- * Version:           1.1.1
+ * Version:           1.1.2
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Tested up to:      6.9
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 define('WPBA_PATH', plugin_dir_path(__FILE__));
 define('WPBA_BASENAME', plugin_basename(__FILE__));
 define('WPBA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WPBA_VERSION', '1.1.1');
+define('WPBA_VERSION', '1.1.2');
 
 /**
  * Class WPBA_Basic_Authentication
@@ -114,32 +114,33 @@ class WPBA_Basic_Authentication
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Password must not be sanitized as it would alter the value. Only unslashed for security.
 		$provided_password = isset($_SERVER['PHP_AUTH_PW']) ? wp_unslash($_SERVER['PHP_AUTH_PW']) : '';
 
-		// Check if stored password is hashed
-		// WordPress password hashes start with $P$ and are typically 34 characters
-		// But we should also check for other hash formats that might be longer
-		$is_password_hashed = (
-			(strlen($password) >= 34 && strpos($password, '$wp') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$P$') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$2y$') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$argon2') === 0)
-		);
+		$is_password_hashed = $this->is_password_hash($password);
 
 		$is_authenticated = false;
 
 		// First check username
-		if (hash_equals($provided_username, $username)) {
+		if (hash_equals($username, $provided_username)) {
 			if ($is_password_hashed) {
-				// Compare with hashed password
 				$is_authenticated = wp_check_password($provided_password, $password);
 			} else {
-				// Legacy support for unhashed passwords (for migration period)
-				$is_authenticated = hash_equals($provided_password, $password);
+				$is_authenticated = hash_equals($password, $provided_password);
 			}
 		}
 
 		if (!$is_authenticated) {
 			$this->send_unauthorized_response();
 		}
+	}
+
+	/**
+	 * Check if a string looks like a password hash.
+	 *
+	 * @param string $value The string to check.
+	 * @return bool
+	 */
+	private function is_password_hash(string $value): bool
+	{
+		return strlen($value) >= 34 && $value[0] === '$';
 	}
 
 	/**
@@ -215,17 +216,7 @@ class WPBA_Basic_Authentication
 		if (version_compare($stored_version, '1.1.0', '<') && !empty($this->options['password'])) {
 			$password = $this->options['password'];
 
-			// Better detection of hashed passwords
-			// WordPress password hashes start with $P$ and are typically 34 characters
-			// But we should also check for other hash formats that might be longer
-			$is_already_hashed = (
-				(strlen($password) >= 34 && strpos($password, '$wp') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$P$') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$2y$') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$argon2') === 0)
-			);
-
-			if (!$is_already_hashed) {
+			if (!$this->is_password_hash($password)) {
 				// Hash the existing password
 				$this->options['password'] = wp_hash_password($password);
 

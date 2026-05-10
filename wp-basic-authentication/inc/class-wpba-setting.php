@@ -169,11 +169,16 @@ class WPBA_Setting
 
 		// Handle 'password'
 		if (isset($input['password']) && !empty($input['password'])) {
-			// Hash the new password if provided
-			$sanitized_input['password'] = wp_hash_password($input['password']);
+			// Only hash if not already hashed (prevents double-hashing when
+			// update_option delegates to add_option, which re-runs sanitize_option)
+			if ($this->is_password_hash($input['password'])) {
+				$sanitized_input['password'] = $input['password'];
+			} else {
+				$sanitized_input['password'] = wp_hash_password($input['password']);
+			}
 		} else {
 			// Retain the old password if no new password is provided
-			$sanitized_input['password'] = $old_options['password'];
+			$sanitized_input['password'] = isset($old_options['password']) ? $old_options['password'] : '';
 		}
 
 		// Sanitize 'enable_login'
@@ -182,6 +187,17 @@ class WPBA_Setting
 			: 0;
 
 		return $sanitized_input;
+	}
+
+	/**
+	 * Check if a string looks like a password hash.
+	 *
+	 * @param string $value The string to check.
+	 * @return bool
+	 */
+	private function is_password_hash(string $value): bool
+	{
+		return strlen($value) >= 34 && $value[0] === '$';
 	}
 
 	/**
@@ -235,10 +251,7 @@ class WPBA_Setting
 		printf(
 			'<p class="description" id="enable_login-description">' .
 				/* translators: %s: URL to the plugin FAQ page */
-				_e(
-					'<strong>Warning: If enable basic authentication for login page and forgot password, please see <a href="%s" target="_blank">FAQs in plugin page</a>',
-					'wp-basic-authentication'
-				) .
+				__( '<strong>Warning</strong>: If enable basic authentication for login page and forgot password, please see <a href="%s" target="_blank">FAQs in plugin page</a>', 'wp-basic-authentication' ) .
 				'</p>',
 			esc_url('https://wordpress.org/plugins/wp-basic-authentication/#faq')
 		);
