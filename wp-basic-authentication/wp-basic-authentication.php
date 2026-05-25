@@ -3,10 +3,10 @@
  * Plugin Name:       WP Basic Authentication
  * Plugin URI:        https://wordpress.org/plugins/wp-basic-authentication/
  * Description:       Basic Authentication for protected your development WordPress site like .htpasswd
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 5.7
  * Requires PHP:      7.4
- * Tested up to:      6.9
+ * Tested up to:      7.0
  * Author:            NuttTaro
  * Author URI:        https://nutttaro.com
  * License:           GPL v2 or later
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 define('WPBA_PATH', plugin_dir_path(__FILE__));
 define('WPBA_BASENAME', plugin_basename(__FILE__));
 define('WPBA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WPBA_VERSION', '1.2.0');
+define('WPBA_VERSION', '1.2.1');
 
 require_once WPBA_PATH . 'inc/helpers.php';
 

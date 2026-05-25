@@ -125,7 +125,7 @@
 }
 
 .wpba-toggle input:checked + .wpba-toggle__track {
-	background: #2271b1;
+	background: var(--wp-admin-theme-color, #2271b1);
 }
 
 .wpba-toggle input:checked + .wpba-toggle__track::after {
@@ -133,7 +133,7 @@
 }
 
 .wpba-toggle input:focus + .wpba-toggle__track {
-	box-shadow: 0 0 0 2px #2271b1;
+	box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #2271b1);
 }
 
 .wpba-toggle__label {
@@ -168,7 +168,7 @@
 }
 
 .wpba-password-toggle:hover {
-	color: #2271b1;
+	color: var(--wp-admin-theme-color, #2271b1);
 }
 
 /* Textareas */
