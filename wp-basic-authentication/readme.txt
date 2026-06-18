@@ -45,7 +45,7 @@ If you're updating from a version older than 1.1.0, your existing password will 
 == Screenshots ==
 
 1. Basic Authentication dialog
-1. Screenshot of the menu page for Featured Posts Setting page.
+1. Screenshot of the menu page for Setting page.
 
 == Changelog ==
 
